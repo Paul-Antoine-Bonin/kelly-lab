@@ -9,7 +9,7 @@ It is the trading floor's favourite topic.
 None. Pure simulation, which is an advantage: nothing can block the project.
 
 ## Steps
-- [ ] Set up repo, `src/` layout plus a demonstration notebook
+- [x] Set up repo, `src/` layout plus a demonstration notebook
 - [ ] Repeated bet simulator: win probability, odds, fraction staked, horizon
 - [ ] Plot wealth paths for several fractions, same random seed
 - [ ] Recover the optimal Kelly fraction numerically, then check it against the
