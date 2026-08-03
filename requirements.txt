@@ -1,0 +1,6 @@
+# Runtime and development dependencies.
+# Install with:  pip install -r requirements.txt && pip install -e .
+numpy>=1.24
+matplotlib>=3.7
+pytest>=8
+jupyter>=1
