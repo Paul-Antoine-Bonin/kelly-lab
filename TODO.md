@@ -10,7 +10,7 @@ None. Pure simulation, which is an advantage: nothing can block the project.
 
 ## Steps
 - [x] Set up repo, `src/` layout plus a demonstration notebook
-- [ ] Repeated bet simulator: win probability, odds, fraction staked, horizon
+- [x] Repeated bet simulator: win probability, odds, fraction staked, horizon
 - [ ] Plot wealth paths for several fractions, same random seed
 - [ ] Recover the optimal Kelly fraction numerically, then check it against the
       analytical formula
@@ -28,5 +28,17 @@ A notebook a non-specialist can run through and understand in ten minutes, and a
 README with the key charts.
 
 ## Traps
-- Fix the random seed so the figures are reproducible.
+- Fix the random seed so the figures are reproducible. Every entry point takes one and
+  none of them touch the global numpy state, so a figure cannot change because
+  something else drew a random number first.
 - Mean final wealth can rise while the median collapses. Never show the mean alone.
+- Accumulate in log wealth, not by multiplying. A few hundred bets at a healthy growth
+  rate overflow float64 on the natural scale, and the interesting horizons are longer
+  than that.
+- Ruin has to be exactly zero, never a small positive number. At a fraction of 1 a
+  single loss multiplies wealth by 0, whose log is -inf, and the running sum must keep
+  it there. Watch the `0 * -inf` case: no losses at fraction 1 is nan if computed
+  naively, when the answer is simply no losses.
+- Drawing the win count from a binomial rather than stepping bet by bet gives the same
+  distribution about 500 times faster (6 ms against 3.3 s for 50,000 paths of 500
+  bets). Use the full paths only when the shape of the path is what you are plotting.
