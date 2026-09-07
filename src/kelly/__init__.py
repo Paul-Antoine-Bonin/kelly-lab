@@ -4,6 +4,9 @@
 probability and net odds, staked at a fixed fraction of wealth over a horizon.
 Everything accumulates in log wealth, so long horizons neither overflow nor
 lose the exact zero that ruin produces.
+
+`kelly.plots` draws the results. It is imported on demand rather than here, so
+that using the simulator never pulls matplotlib in.
 """
 
 from .simulate import BetSpec

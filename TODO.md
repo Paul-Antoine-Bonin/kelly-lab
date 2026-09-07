@@ -11,7 +11,7 @@ None. Pure simulation, which is an advantage: nothing can block the project.
 ## Steps
 - [x] Set up repo, `src/` layout plus a demonstration notebook
 - [x] Repeated bet simulator: win probability, odds, fraction staked, horizon
-- [ ] Plot wealth paths for several fractions, same random seed
+- [x] Plot wealth paths for several fractions, same random seed
 - [ ] Recover the optimal Kelly fraction numerically, then check it against the
       analytical formula
 - [ ] Show the bell curve of growth rate against fraction, and the point where it
@@ -39,6 +39,11 @@ README with the key charts.
   single loss multiplies wealth by 0, whose log is -inf, and the running sum must keep
   it there. Watch the `0 * -inf` case: no losses at fraction 1 is nan if computed
   naively, when the answer is simply no losses.
+- Comparing fractions only means anything on one shared draw. `draw_wins` produces the
+  outcomes once and `log_paths_from_wins` replays them at each fraction; simulating
+  each fraction separately would mix sizing up with luck.
+- A logarithmic wealth axis cannot draw the exact zero that ruin produces. `plots`
+  floors the drawn value instead, which is a drawing convention and not a result.
 - Drawing the win count from a binomial rather than stepping bet by bet gives the same
   distribution about 500 times faster (6 ms against 3.3 s for 50,000 paths of 500
   bets). Use the full paths only when the shape of the path is what you are plotting.

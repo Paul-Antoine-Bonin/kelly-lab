@@ -82,6 +82,53 @@ def as_generator(seed: SeedLike = None) -> np.random.Generator:
     return np.random.default_rng(seed)
 
 
+def draw_wins(
+    spec: BetSpec,
+    horizon: int,
+    n_paths: int = 1,
+    seed: SeedLike = None,
+) -> np.ndarray:
+    """Win/loss outcomes, shape `(n_paths, horizon)`, `True` for a win.
+
+    Split out from the path builder so that several fractions can be replayed
+    on the *same* coin flips. Comparing stake sizes on independent draws is
+    comparing luck as much as sizing, and the whole point of the comparison is
+    that the sequence of bets is not what separates them.
+    """
+    rng = as_generator(seed)
+    return rng.random((n_paths, horizon)) < spec.p
+
+
+def log_paths_from_wins(
+    wins: np.ndarray,
+    spec: BetSpec,
+    fraction: float,
+) -> np.ndarray:
+    """Turn win/loss outcomes into log wealth paths at a given `fraction`.
+
+    `wins` has shape `(n_paths, horizon)`; the result has one extra column at
+    the front for the starting bankroll, at log wealth 0.
+    """
+    if not 0.0 <= fraction <= 1.0:
+        raise ValueError(
+            f"fraction must be between 0 and 1, got {fraction}. Above 1 would "
+            f"mean staking borrowed money, which this simulator does not model."
+        )
+    wins = np.atleast_2d(np.asarray(wins, dtype=bool))
+    n_paths, horizon = wins.shape
+
+    # log1p keeps precision for the small fractions that matter most, and
+    # errstate silences the deliberate log(0) at fraction == 1.
+    with np.errstate(divide="ignore"):
+        log_win = np.log1p(fraction * spec.b)
+        log_loss = np.log1p(-fraction)
+
+    steps = np.where(wins, log_win, log_loss)
+    paths = np.zeros((n_paths, horizon + 1), dtype=float)
+    np.cumsum(steps, axis=1, out=paths[:, 1:])
+    return paths
+
+
 def simulate_log_paths(
     spec: BetSpec,
     fraction: float,
@@ -104,19 +151,8 @@ def simulate_log_paths(
     if n_paths < 1:
         raise ValueError(f"n_paths must be at least 1, got {n_paths}")
 
-    rng = as_generator(seed)
-    wins = rng.random((n_paths, horizon)) < spec.p
-
-    # log1p keeps precision for the small fractions that matter most, and
-    # errstate silences the deliberate log(0) at fraction == 1.
-    with np.errstate(divide="ignore"):
-        log_win = np.log1p(fraction * spec.b)
-        log_loss = np.log1p(-fraction)
-
-    steps = np.where(wins, log_win, log_loss)
-    paths = np.zeros((n_paths, horizon + 1), dtype=float)
-    np.cumsum(steps, axis=1, out=paths[:, 1:])
-    return paths
+    wins = draw_wins(spec, horizon, n_paths=n_paths, seed=seed)
+    return log_paths_from_wins(wins, spec, fraction)
 
 
 def wealth_paths(

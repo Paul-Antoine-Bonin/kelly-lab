@@ -5,7 +5,7 @@ Why betting too big ruins you even when you have an edge.
 With a real, positive edge, staking too large a fraction of your wealth leads to
 near-certain ruin. This repo builds the simulations that show it.
 
-The simulator works. The charts and the optimal fraction come next.
+The simulator works and the first chart is drawn. The optimal fraction comes next.
 
 ## Setup
 
@@ -42,6 +42,35 @@ Ruin is exact. Staking the whole bankroll turns one loss into wealth of precisel
 zero, whose log is `-inf`, and the running sum keeps it there. There is no recovery
 from zero and the simulator does not pretend otherwise.
 
+## The same run, five different stakes
+
+![Wealth paths at five fractions](figures/wealth-paths.png)
+
+One run of 150 bets on the coin above, replayed at five stakes. Every curve sees the
+*same* wins and the same losses, drawn once and reused, so nothing here is luck: only
+the stake changes.
+
+| Fraction | Wealth after 150 bets |
+|---|---|
+| 0.05 | 8.4 |
+| 0.25 | 26.8 |
+| 0.50 | 0.0000153 |
+| 0.75 | below 1e-9 |
+| 0.95 | below 1e-9 |
+
+The bet has a +0.50 edge throughout. Staking a quarter turns the bankroll into 27
+times itself; staking three quarters of it destroys the bankroll on the same run of
+cards. Regenerate the figure with:
+
+```bash
+python scripts/make_wealth_paths_figure.py
+```
+
+Wealth is on a logarithmic axis, so a constant growth rate is a straight line. Paths
+are floored at 1e-9 for drawing: a line resting on the bottom of the chart has lost
+more than nine orders of magnitude, and at a fraction of exactly 1 it is truly zero
+and never comes back.
+
 ## Verified against the closed form
 
 Expected log growth per bet is `p·log(1+fb) + q·log(1-f)`. Simulating 50,000 paths of
@@ -60,7 +89,7 @@ Expected log growth per bet is `p·log(1+fb) + q·log(1-f)`. Simulating 50,000 p
 Every row is the same bet with the same +0.50 edge. Only the stake changes. By 0.60
 the growth rate is negative and 93% of runs have lost 99% of the bankroll, and none of
 that comes from a bad bet. That is the whole thesis of the repo, and locating the peak
-and drawing the curve are the next steps in [TODO.md](TODO.md).
+numerically is the next step in [TODO.md](TODO.md).
 
 ## Speed
 
@@ -81,8 +110,10 @@ one for sweeps.
 pytest
 ```
 
-40 tests. The deterministic ones pin the mechanics: a certain win compounds at exactly
+55 tests. The deterministic ones pin the mechanics: a certain win compounds at exactly
 `1 + fb`, wealth only ever moves by one of two factors, ruin never recovers. Three
-statistical ones check the simulator against the closed form on a fixed seed.
+statistical ones check the simulator against the closed form on a fixed seed. The
+chart tests read the data back off the axes and check it against the simulator, so a
+figure cannot drift away from what it claims to draw.
 
 Roadmap and progress: [TODO.md](TODO.md)
