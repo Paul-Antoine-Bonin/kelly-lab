@@ -12,7 +12,7 @@ None. Pure simulation, which is an advantage: nothing can block the project.
 - [x] Set up repo, `src/` layout plus a demonstration notebook
 - [x] Repeated bet simulator: win probability, odds, fraction staked, horizon
 - [x] Plot wealth paths for several fractions, same random seed
-- [ ] Recover the optimal Kelly fraction numerically, then check it against the
+- [x] Recover the optimal Kelly fraction numerically, then check it against the
       analytical formula
 - [ ] Show the bell curve of growth rate against fraction, and the point where it
       drops back below zero despite a positive edge
